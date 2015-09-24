@@ -12,11 +12,17 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 public class CardGame implements ActionListener {
-
-	ArrayList<Card> cardPack = new ArrayList<Card>(50);
+	
+	ArrayList<Card> cardPack = CardPackFactory.makeCardList();
+	ArrayList<CardButton> displayButtons = new ArrayList<CardButton>(16);
 
 	Boolean cardChosen = false;
 
+	int buttonNumber = 4;
+	int cardCounter = buttonNumber;
+	int score = 0;
+	int cardPackCounter=0;
+	
 	Card chosen1 = new Card(100, "chosen 1");
 	Card chosen2 = new Card(100, "chosen 2");
 
@@ -27,91 +33,68 @@ public class CardGame implements ActionListener {
 	JButton b3 = new JButton();
 	JButton b4 = new JButton();
 	Dimension buttonSize = new Dimension(200,200);
-	Dimension textSize = new Dimension(400,100);
+	Dimension textSize = new Dimension(200,100);
+	Dimension scoreSize = new Dimension(200,100);
 	JTextField textField = new JTextField("Select a card");
-	int buttonNumber = 4;
-	int cardCounter = buttonNumber;
-	int numOfCards = 0;
+	JTextField scoreField = new JTextField("No of matches: "+ score);
 
 	public static void main(String[] args) {
 		new CardGame().go();
 	}
 
 	private void go() {
-		makeCardList();
+		setupDisplayButtons();
 		makeGameBoard();
+	}
 
+	private void setupDisplayButtons() {
+		for (int i = 0; i < buttonNumber; i++) {
+			displayButtons.add(new CardButton(false,false,cardPack.get(i),i));
+			cardPackCounter++;
+		}
 	}
 
 	private void makeGameBoard() {
-		/*
-		 * for (int i = 0; i < buttonNumber; i++) {
-		 * 
-		 * "b"+i.setText(cardPack.get(i).cardText);
-		 * 
-		 * }
-		 */
+
 		textField.setPreferredSize(textSize);
 		panel.add(textField);
+		scoreField.setPreferredSize(scoreSize);
+		panel.add(scoreField);
 		
-		b1.addActionListener(this);
-		b1.setText(cardPack.get(0).cardText);
-		b1.setPreferredSize(buttonSize);
-		panel.add(b1);
-		b2.addActionListener(this);
-		b2.setText(cardPack.get(1).cardText);
-		b2.setPreferredSize(buttonSize);
-		panel.add(b2);
-		b3.addActionListener(this);
-		b3.setText(cardPack.get(2).cardText);
-		b3.setPreferredSize(buttonSize);
-		panel.add(b3);
-		b4.addActionListener(this);
-		b4.setText(cardPack.get(3).cardText);
-		b4.setPreferredSize(buttonSize);
-		panel.add(b4);
+		 for (int i = 0; i < buttonNumber; i++) {  
+			  CardButton button = displayButtons.get(i);
+			  button.addActionListener(this);
+			  button.setText(button.card.cardText);
+			  button.setPreferredSize(buttonSize);
+			  panel.add(button);
+			  }
+		
+
 		frame.setSize(500,600);
 		frame.add(panel);
 		//frame.pack();
 		frame.setVisible(true);
 	}
 
-	void makeCardList() {
-	//	Card a6 = new Card(6, "2 x 3");
-	//	Card b6 = new Card(6, "double 3");
-	//	Card a4 = new Card(4, "2 x 2");
-	//	Card b4 = new Card(4, "double 2");
-	//	Card c6 = new Card(6, "half 12");
-	//	Card d6 = new Card(6, "12/2");
-	//	Card c4 = new Card(4, "half 8");
-	//	Card d4 = new Card(4, "8/2");
-		
-
-		cardPack.add(new Card(6, "2 x 3"));
-		cardPack.add(new Card(6, "double 3"));
-		cardPack.add(new Card(4, "2 x 2"));
-		cardPack.add(new Card(4, "double 2"));
-		cardPack.add(new Card(6, "half 12"));
-		cardPack.add(new Card(6, "12/2"));
-		cardPack.add(new Card(4, "half 8"));
-		cardPack.add(new Card(4, "8/2"));
-		
-		numOfCards = 8;
-	}
+	
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		System.out.println(((JButton) e.getSource()).getText());
-
+		
+		CardButton clickedCardButton = (CardButton) e.getSource();
+		clickedCardButton.setClick();
+		System.out.println(clickedCardButton.getText());
 		if (!cardChosen) {
 			cardChosen = true;
 			System.out.println("First card");
-			chosen1.cardText = (((JButton) e.getSource()).getText());
+			chosen1.cardText = (clickedCardButton.getText());
 	// Change the button color to red
-	//		(((JButton) e.getSource()).setBackground(Color.RED));
+			clickedCardButton.setOpaque(true);
+			clickedCardButton.setBackground(Color.RED);
+			
 			System.out.println(chosen1.cardText);
-			for (int i = 0; i < numOfCards; i++) {
+			for (int i = 0; i < cardPack.size(); i++) {
 				if (chosen1.cardText.equals(cardPack.get(i).cardText)) {
 					chosen1.value = cardPack.get(i).value;
 				}
@@ -125,18 +108,22 @@ public class CardGame implements ActionListener {
 		chosen2.cardText=((JButton) e.getSource()).getText(); 
 		if (chosen2.cardText.equals(chosen1.cardText)){ 
 			System.out.println("same button"); 
-			resetCard(); 
+			clickedCardButton.unsetClick();
+			resetCard(((JButton) e.getSource())); 
 		  } 
 		else{ 
-			for (int i = 0; i < numOfCards; i++) { 
+			for (int i = 0; i < cardPack.size(); i++) { 
 				if (chosen2.cardText.equals(cardPack.get(i).cardText)){ 
 					chosen2.value = cardPack.get(i).value; 
 					} 
 			}
 				if (chosen1.value==chosen2.value){ 
 					JOptionPane.showMessageDialog(null, "Match"); 
+					score++;
+					System.out.println(score);
+					
 					replaceCards();
-					resetCard(); 
+					resetCard((JButton) e.getSource()); 
 					} 
 				else{ 
 					JOptionPane.showMessageDialog(null, "Sorry these don't match"); 
@@ -152,8 +139,9 @@ public class CardGame implements ActionListener {
 
 	}
 
-	private void resetCard() {
+	private void resetCard(JButton jButton) {
 		cardChosen = false;
+		jButton.setOpaque(false);
   textField.setText("Select a card");
 	}
 
