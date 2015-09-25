@@ -6,13 +6,13 @@ public class CardButton extends JButton{
 	Boolean firstClick;
 	Boolean secondClick;
 	Card card;
-	int index;
 	
-	CardButton(Boolean firstClick,Boolean secondClick,Card card,int index){
+	
+	CardButton(Boolean firstClick,Boolean secondClick,Card card){
 		this.card = card;
 		this.firstClick = firstClick;
 		this.secondClick = secondClick;
-		this.index = index;
+		
 	}
 	
 	void setClick(){
@@ -27,6 +27,14 @@ public class CardButton extends JButton{
 	public void unsetClick() {
 		this.firstClick = false;
 		System.out.println("unset click");
+	}
+	
+	Card getCard(){
+		return this.card;
+	}
+	
+	int getValue(){
+		return this.card.value;
 	}
 
 }
