@@ -21,13 +21,13 @@ public class CardGame implements ActionListener {
 
 	Boolean cardChosen = false;
 	Boolean moreCards = true;
+	Boolean gameFinished = false;
 	int random;
 
 	int buttonNumber = 6;
 	int cardCounter = buttonNumber;
 	int score = 0;
 	int misses = 0;
-
 
 	Card chosen1 = new Card(100, "chosen 1");
 	Card chosen2 = new Card(100, "chosen 2");
@@ -55,29 +55,40 @@ public class CardGame implements ActionListener {
 
 	private void setupDisplayButtons() {
 		for (int i = 0; i < buttonNumber; i++) {
-			displayButtons.add(new CardButton(false, false, cardPack.remove(new Random().nextInt(cardPack.size()-1))));
-	
+			CardButton cardB1 = makeDisplayButton();
+			displayButtons.add(cardB1);
+
 		}
+	}
+
+	private CardButton makeDisplayButton() {
+		System.out.println(cardPack.size() - 1);
+		CardButton cardB1 = new CardButton(false, cardPack.remove(new Random().nextInt(cardPack.size())));
+		cardB1.addActionListener(this);
+		return cardB1;
 	}
 
 	private void makeGameBoard() {
 		frame = new JFrame();
 		panel = new JPanel();
 		textField = new JLabel("Select a card");
-		scoreField = new JTextArea("\nCards remaining = "
-				+ (cardPack.size()) + "\n\nNo of matches: "
-				+ score + "\n\nNo of misses = " +misses);
+		scoreField = new JTextArea();
+		setScoreField();
 		scoreField.setEditable(false);
 		textField.setPreferredSize(textSize);
 		panel.add(textField);
 		scoreField.setPreferredSize(scoreSize);
 		panel.add(scoreField);
+		if (gameFinished) {
+			JLabel label = new JLabel();
+			label.setText("Congratulations, you finished the game");
+			panel.add(label);
+		}
 
 		for (int i = 0; i < displayButtons.size(); i++) {
 			CardButton button = displayButtons.get(i);
 			System.out.println("adding buttons " + button.firstClick + ", "
 					+ button.card.cardText);
-			button.addActionListener(this);
 			button.setText(button.card.cardText);
 			button.setPreferredSize(buttonSize);
 			panel.add(button);
@@ -89,13 +100,20 @@ public class CardGame implements ActionListener {
 		frame.setVisible(true);
 	}
 
+	private void setScoreField() {
+		scoreField.setText("\nCards remaining = " + (cardPack.size())
+				+ "\n\nNo of matches: " + score + "\n\nNo of misses = "
+				+ misses);
+
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		System.out.println("No of buttons = " + displayButtons.size() + "\nNo of cards = "+cardPack.size());
+		System.out.println("No of buttons = " + displayButtons.size()
+				+ "\nNo of cards = " + cardPack.size());
 
 		CardButton clickedCardButton = (CardButton) e.getSource();
 		clickedCardButton.setClick();
-		System.out.println(clickedCardButton.getText());
 		if (!cardChosen) {
 			cardChosen = true;
 			System.out.println("First card");
@@ -105,7 +123,6 @@ public class CardGame implements ActionListener {
 					+ chosen1.value);
 			// Change the button color to red
 			setRed(clickedCardButton);
-
 			textField.setText("Chose another card with the same value");
 		} else {
 			chosen2 = clickedCardButton.getCard();
@@ -127,6 +144,7 @@ public class CardGame implements ActionListener {
 					JOptionPane.showMessageDialog(null,
 							"Sorry these don't match");
 					misses++;
+					setScoreField();
 					clickedCardButton.unsetClick();
 					removeRed(clickedCardButton);
 				}
@@ -154,20 +172,25 @@ public class CardGame implements ActionListener {
 		cardChosen = false;
 		chosen1 = new Card(100, "chosen 1");
 		chosen2 = new Card(100, "chosen 2");
-		for (int i=displayButtons.size()-1;i>=0; i--) {
+		for (int i = displayButtons.size() - 1; i >= 0; i--) {
 			if (displayButtons.get(i).getClick() == true) {
 				if (moreCards) {
 					System.out.println(displayButtons.get(i).getClick());
-					displayButtons.set(i,new CardButton(false, false, cardPack.remove(new Random().nextInt(cardPack.size()-1))));
-					if (cardPack.size()==0) {
+					CardButton cardB1 = makeDisplayButton();
+					displayButtons.set(i, cardB1);
+					System.out.println("Card pack size is " + cardPack.size());
+					if (cardPack.size() == 0) {
 						System.out.println("No more cards");
 						moreCards = false;
 
-					} 
-				}
-				else {
-						displayButtons.remove(i);
-						System.out.println("remove button "+i);
+					}
+				} else {
+					displayButtons.remove(i);
+					System.out.println("remove button " + i);
+					if (displayButtons.isEmpty()) {
+						gameFinished = true;
+
+					}
 				}
 			}
 
