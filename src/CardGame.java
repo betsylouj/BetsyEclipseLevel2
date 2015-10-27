@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -81,7 +82,8 @@ public class CardGame implements ActionListener {
 		panel.add(scoreField);
 		if (gameFinished) {
 			JLabel label = new JLabel();
-			label.setText("Congratulations, you finished the game");
+			label.setFont(new Font(Font.SERIF, Font.BOLD,24 ));
+			label.setText("Congratulations\n you finished the game");
 			panel.add(label);
 		}
 
